@@ -39,6 +39,10 @@ function updateDays() {
     var dates = deliveryDay.getElementsByTagName("option");
     var deliveryMonth = document.getElementById("delivMo");
     var deliveryYear = document.getElementById("delivYr");
+    // cover for no month selected
+    if (deliveryMonth.selectedIndex === -1) {
+        return;
+    }
     var selectedMonth = deliveryMonth.options[deliveryMonth.selectedIndex].value;
     while (dates[28]) {
         deliveryDay.removeChild(dates[28]);
@@ -130,10 +134,10 @@ function validateAddress(fieldsetId) {
         // action for invalid fieldset
          if (fieldsetValidity === false) {
              if (fieldsetId === "billingAddress") {
-                throw "Please complete all Billing Address information."
+                throw "Please complete all Billing Address information.";
              }
              else {
-                throw "Please complete all Delivery Address information."
+                throw "Please complete all Delivery Address information.";
              }
          }
          else {
@@ -145,6 +149,176 @@ function validateAddress(fieldsetId) {
         errorDiv.style.display = "block";
         errorDiv.innerHTML = msg;
         formValidity = false;
+    }
+}
+
+// function to validate delivery date
+function validateDeliveryAddress() {
+    var selectElements = document.querySelectorAll("#deliveryDate" + " select");
+    var errorDiv = document.querySelectorAll("#deliveryDate" + " .errorMessage")[0];
+    var fieldsetValidity = true;
+    var elementCount = selectElements.length;
+    var currentElement;
+    try {
+        // loop through input fields looking for blanks
+        for (var i = 0; i < elementCount; i++) {
+            currentElement = selectElements[i];
+            // blanks
+            if (currentElement.selectedIndex === -1) {
+                currentElement.style.border = "1px solid red";
+                fieldsetValidity = false;
+            }
+            // not blanks
+            else {
+                currentElement.style.border = "";
+            }
+        }
+
+        // action for invalid fieldset
+         if (fieldsetValidity === false) {
+                throw "Please specify a Delivery Date.";
+         }
+         else {
+             errorDiv.style.displasy = "none";
+             errorDiv.innerHTML = "";
+         }
+    }
+    catch(msg) {
+        errorDiv.style.display = "block";
+        errorDiv.innerHTML = msg;
+        formValidity = false;
+    }
+}
+
+// function to validate payment
+function validatePayment() {
+    var errorDiv = document.querySelectorAll("#paymentInfo" + " .errorMessage")[0];
+    var fieldsetValidity = true;
+    var ccNumEle = document.getElementById("ccNum");
+    var selectElements = document.querySelectorAll("#paymentInfo" + " select");
+    var cvvNumEle = document.getElementById("cvv");
+    var cards = document.getElementsByName("PaymentType");
+    var elementCount = selectElements.length;
+    var currentElement;
+    try {
+        // validate radio buttons one must be on
+        if (!cards[0].checked && !cards[1].checked && !cards[2].checked && !cards[3].checked ) {
+            for (var i = 0; i < cards.length; i++) {
+                cards[i].style.outline = "1px solid red";
+            }
+        }
+        // validate req'd card nbr
+        if (ccNumEle.value === "") {
+            ccNumEle.style.background = "rgb(255, 233, 233)"; 
+        }
+         else {
+             ccNumEle.style.background = "white";
+         }
+
+              // validate req'd card nbr
+             if (cvvNumEle.value === "") {
+                cvvNumEle.style.background = "rgb(255, 233, 233)"; 
+         }
+         else {
+             cvvNumEle.style.background = "white";
+         }
+         for (var i = 0; i < elementCount; i++) {
+            currentElement = selectElements[i];
+            // blanks
+            if (currentElement.selectedIndex === -1) {
+                currentElement.style.border = "1px solid red";
+                fieldsetValidity = false;
+            }
+            // not blanks
+            else {
+                currentElement.style.border = "";
+            }
+        }
+        // action for invalid fieldset
+         if (fieldsetValidity === false) {
+                throw "Please complete all Payment info.";
+         }
+         else {
+             errorDiv.style.displasy = "none";
+             errorDiv.innerHTML = "";
+         }
+    }
+    catch(msg) {
+        errorDiv.style.display = "block";
+        errorDiv.innerHTML = msg;
+        formValidity = false;
+    }
+}
+
+// function to validate custom message
+function validateMessage() {
+    var msgBox = document.getElementById("customText")
+    var errorDiv = document.querySelectorAll("#message" + " .errorMessage")[0];
+    var fieldsetValidity = true;
+    try {
+        // validate checkbox and textarea custom message
+
+        if (document.getElementById("custom").checked && (msgBox.value === "" || msgBox.value === placeholder)) {
+            throw "Please enter your Custom Message text.";
+        }
+        else {
+            errorDiv.style.displasy = "none";
+            errorDiv.innerHTML = "";
+            msgBox.style.background = "white";
+        }
+    }
+    catch(msg) {
+        errorDiv.style.display = "block";
+        errorDiv.innerHTML = msg;
+        msgBox.style.background = "rgb(255, 233, 233)"
+    }
+}
+
+// function to validate create account
+function validateCreateAccount() {
+    var errorDiv = document.querySelectorAll("#createAccount" + " .errorMessage")[0];
+    var usernameElement = document.getElementById("username");
+    var pass1Element = document.getElementById("pass1");
+    var pass2Element = document.getElementById("pass2");
+    var invColor = "rgb(255, 233, 233)";
+    var passwordMismatch = false;
+    var fieldsetValidity = true;
+    usernameElement.style.background = "white";
+    pass1Element.style.background = "white";
+    pass2Element.style.background = "white";
+    errorDiv.style.display = "none";
+    errorDiv.innerHTML = "";
+    try {
+        if (usernameElement.value !==  "" && pass1Element.value !== "" && pass2Element.value !== "") {
+            //one or more fields has data
+            if (pass1Element.value !== pass2Element.value) {
+            // verify passwords match
+            fieldsetValidity = false;
+            passwordMismatch = true;
+            throw "Passwords entered do not match, please re-enter.";
+            }
+        }
+        else if (usernameElement.value !==  "" && pass1Element.value !== "" && pass2Element.value !== "") { //no fields have data
+            fieldsetValidity = true;
+            passwordMismatch = false;
+            }
+        else {
+            fieldsetValidity = false;
+            throw "Please enter all fields to Create Account."
+        }
+        }
+    catch(msg) {
+        errorDiv.style.display = "block";
+        errorDiv.innerHTML = msg;
+        pass1Element.style.background = invColor;
+        pass2Element.style.background = invColor;
+        formValidity = false;
+        if (passwordMismatch) {
+            usernameElement.style.background = "white";
+        }
+        else {
+            usernameElement.style.background = invColor;
+        }
     }
 }
 
@@ -162,6 +336,10 @@ function validateForm(evt) {
 
     validateAddress("billingAddress");
     validateAddress("deliveryAddress");
+    validateDeliveryAddress();
+    validatePayment();
+    validateMessage();
+    validateCreateAccount();
 
     if (formValidity === true ) { // form is valid 
         document.getElementById("errorText").innerHTML = "";
